@@ -32,11 +32,11 @@ Our team is comprised of:
 
 ## Technologies, APIs, and Datasets Utilized
 
-We made use of:
+I made use of:
 
--This example project by Chris Metcalf as a starting point: http://jsfiddle.net/chrismetcalf/gbZH5/
-jQuery
+- This example project by Chris Metcalf as a starting point: http://jsfiddle.net/chrismetcalf/gbZH5/
 - Google Maps API
+- jQuery
 - Google Mapmaker (https://www.google.com/mapmaker?gw=66&ptab=1&uid=217151611049476866638&start=0&sort=)
 - User Generated Route Database [API](https://communities.socrata.com/Community-Resources/Pronto-Bike-Routes/4uqz-b36x)
 - Pronto Bike Stations [API](https://communities.socrata.com/Community-Resources/Pronto-Bike-Share-Stations/rsib-fvg5)
