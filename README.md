@@ -15,8 +15,8 @@ Use Pronto bike sharing as a starting point. Why?
 
 Plan for the project:
 
-1.	use the Google Maps api to represent the routes - would be nice to include a way to manually adjust routes with waypoints in mobile app
-2.	ability to enter in a desired address and identify a nearby Pronto station to leave the bike 
+1.	use the Google Maps api to represent the routes - would be nice to include a way to manually adjust routes with waypoints in a mobile app
+2.	include the ability to enter in a desired address and identify a nearby Pronto station to leave the bike 
 3.	tap into the Pronto API to check bike station status (available bike, docking space)
 4.	analyze the existing Pronto bike sharing data and determine the trips that are most in demand - input in some sample routes for frequent trips so people have something to start out with
 5.	beyond trip distance and time estimates, have a way rate routes according to safety (separation from cars, etc), difficulty, scenery, trip cost, car traffic - particularly during rush hour
