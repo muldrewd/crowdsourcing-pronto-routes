@@ -34,7 +34,7 @@ Our team is comprised of:
 
 I made use of:
 
-- This example project by Chris Metcalf as a starting point: http://jsfiddle.net/chrismetcalf/gbZH5/
+- This example project as a starting point by Chris Metcalf: http://jsfiddle.net/chrismetcalf/gbZH5/
 - Google Maps API
 - jQuery
 - Google Mapmaker (https://www.google.com/mapmaker?gw=66&ptab=1&uid=217151611049476866638&start=0&sort=)
