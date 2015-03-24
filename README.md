@@ -34,11 +34,11 @@ Our team is comprised of:
 
 We made use of:
 
-- jQuery
+-This example project by Chris Metcalf as a starting point: http://jsfiddle.net/chrismetcalf/gbZH5/
+jQuery
 - Google Maps API
 - Google Mapmaker (https://www.google.com/mapmaker?gw=66&ptab=1&uid=217151611049476866638&start=0&sort=)
 - User Generated Route Database [API](https://communities.socrata.com/Community-Resources/Pronto-Bike-Routes/4uqz-b36x)
 - Pronto Bike Stations [API](https://communities.socrata.com/Community-Resources/Pronto-Bike-Share-Stations/rsib-fvg5)
-- This example project by Chris Metcalf as a starting point: http://jsfiddle.net/chrismetcalf/gbZH5/
 
 Our code is licensed under the [MIT License](LICENSE.md). Pull requests will be accepted to this repo, pending review and approval.
