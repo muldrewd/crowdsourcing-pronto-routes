@@ -13,7 +13,7 @@ Use Pronto bike sharing as a starting point. Why?
 3.	tractable problem since there are a finite number of stations (50 stations so far - more in the future), which would be much easier to crowdsource new routes among the stations and match the previous route data to a new commuting trip request
 4.	can later be extended to be a useful platform for people who own their own bikes as well or other bike sharing programs
 
-Plan for the project:
+## Plan for the project:
 
 1.	use the Google Maps api to represent the routes - would be nice to include a way to manually adjust routes with waypoints in a mobile app
 2.	include the ability to enter in a desired address and identify a nearby Pronto station to leave the bike 
