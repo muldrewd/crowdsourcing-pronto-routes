@@ -1,48 +1,40 @@
-function geocode(address) {
-  return $.Deferred(function(dfrd) {
-    console.log(address);
-    (new google.maps.Geocoder()).geocode({'address': address}, function(results, status) {
-      if(status === google.maps.GeocoderStatus.OK) {
-        dfrd.resolve(results[0]);
-      } else {
-        dfrd.reject(new Error(status));
+(function() {
+
+  var map;
+  var socrataAppToken = 'MmFqykL8mygeptjRHvgrmqcHL';
+
+  function geocode(address) {
+    return $.Deferred(function(dfrd) {
+      (new google.maps.Geocoder()).geocode({'address': address}, function(results, status) {
+        if(status === google.maps.GeocoderStatus.OK) {
+          dfrd.resolve(results[0]);
+        } else {
+          dfrd.reject(new Error(status));
+        }
+      });
+    }).promise();
+  }
+
+  function getNearbyProntoStation(lat, lon) {
+    return $.getJSON(
+      'https://communities.socrata.com/resource/rsib-fvg5.json?'
+      + '&$where=within_circle(location_1, ' + lat + ', ' + lon + ', 1000)'
+      + '&$$app_token=' + socrataAppToken);
+  }
+
+  function addMarker(location) {
+    var marker = new google.maps.Marker({
+      map: map,
+      position: location,
+      icon: {
+        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+        scale: 4
       }
     });
-  }).promise();
-}
-
-function getNearbyProntoStation(lat, lon) {
-  return $.getJSON(
-    'https://communities.socrata.com/resource/rsib-fvg5.json?'
-    + '&$where=within_circle(location_1, ' + lat + ', ' + lon + ', 1000)'
-    + '&$$app_token=MmFqykL8mygeptjRHvgrmqcHL');
-}
-
-function addMarker(map, location) {
-  var marker = new google.maps.Marker({
-    map: map,
-    position: location,
-    icon: {
-      path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-      scale: 4
-    }
-  });
-}
-
-$(document).ready(function () {
-  // Intialize our map
-  var center = new google.maps.LatLng(47.645292, -122.301120);
-  var mapOptions = {
-    zoom: 12,
-    center: center,
-    draggable: false
   }
-  var map = new google.maps.Map(document.getElementById("map"), mapOptions);
 
-  // Initialize our data table
-  $('#results').dataTable();
+  function handleSearchSubmit(event) {
 
-  $("#search").submit(function (event) {
     event.preventDefault();
 
     // Geocode our addresses
@@ -52,14 +44,18 @@ $(document).ready(function () {
       geocode($("#endaddress").val())
 
     )
-    .done(function(start_geocode, end_geocode) {
+    .done(initMap);
+
+  }
+
+  function initMap(start, end) {
 
       // Add markers for start and end
-      var startLoc = start_geocode.geometry.location;
-      var endLoc = end_geocode.geometry.location;
+      var startLoc = start.geometry.location;
+      var endLoc = end.geometry.location;
 
-      addMarker(map, startLoc);
-      addMarker(map, endLoc);
+      addMarker(startLoc);
+      addMarker(endLoc);
 
       // Get our start and end locations
       $.when(
@@ -68,38 +64,78 @@ $(document).ready(function () {
         getNearbyProntoStation(endLoc.lat(), endLoc.lng())
 
       )
-      .done(function(start_stations, end_stations) {
+      .done(displayStations);
 
-        console.log(start_stations[0][0]);
+  }
 
-        // Query our routes dataset to get matching routes
-        var start_station_matches = [];
-        $.each(start_stations[0], function(i, st) {
-          start_station_matches.push("starting_station = '" + st.number + "'");
-        });
-        var end_station_matches = [];
-        $.each(end_stations[0], function(i, st) {
-          end_station_matches.push("end_station = '" + st.number + "'");
-        });
+  function getStationNumbers(stations) {
+    return stations[0].map(function(station) { return station.number; });
+  }
 
-        var query = "(" + start_station_matches.join(" OR ") + ")"
-        + " AND "
-        + " (" + end_station_matches.join(" OR ") + ")";
+  function buildStationRouteQuery(startStations, endStations) {
 
-        console.log(query);
+    return "(starting_station='" + getStationNumbers(startStations).join("' OR starting_station='") + "')"
+            + " AND "
+            + " (end_station='" + getStationNumbers(endStations).join("' OR end_station='") + "')";
 
-        url = 'https://communities.socrata.com/resource/4uqz-b36x.json?'
-        + '$where=' + query
-        + '&$$app_token=MmFqykL8mygeptjRHvgrmqcHL';
-        $.getJSON(url, function(data, status) {
-          // Add em!
-          $.each(data, function (i, entry) {
-            $('#results').dataTable().fnAddData(
-              [entry.starting_station, entry.end_station, '<a href="' + entry.route_link + '" target="_blank">View route &raquo;</a>', entry.distance, entry.time, entry.elevation_gain, entry.elevation_descent, entry.scenery, entry.difficulty]);
-            });
-          });
+  }
 
-        });
+  function getMatchingProntoRoutes(startStations, endStations) {
+
+    var url = 'https://communities.socrata.com/resource/4uqz-b36x.json?'
+                + '$where=' + buildStationRouteQuery(startStations, endStations)
+                + '&$$app_token=' + socrataAppToken;
+
+    return $.getJSON(url);
+
+  }
+
+  function displayStations(startStations, endStations) {
+
+    $.when(
+
+      getMatchingProntoRoutes(startStations, endStations)
+
+    ).done(function(data) {
+
+      $.each(data, function (i, entry) {
+        $('#results').dataTable().fnAddData(
+          [
+            entry.starting_station,
+            entry.end_station,
+            '<a href="' + entry.route_link + '" target="_blank">View route &raquo;</a>',
+            entry.distance,
+            entry.time,
+            entry.elevation_gain,
+            entry.elevation_descent,
+            entry.scenery,
+            entry.difficulty
+          ]
+        );
       });
+
     });
+
+  }
+
+  $(document).ready(function() {
+
+    // Intialize our map
+    var center = new google.maps.LatLng(47.645292, -122.301120);
+
+    var mapOptions = {
+      zoom: 12,
+      center: center,
+      draggable: false
+    }
+
+    map = new google.maps.Map(document.getElementById("map"), mapOptions);
+
+    // Initialize our data table
+    $('#results').dataTable();
+
+    $("#search").submit(handleSearchSubmit);
+
   });
+
+})();
