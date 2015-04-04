@@ -25,12 +25,40 @@
   function addMarker(location) {
     var marker = new google.maps.Marker({
       map: map,
-      position: location,
-      icon: {
-        path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-        scale: 4
-      }
+      position: location
     });
+  }
+
+  function getDirections(start, end, travelMode) {
+
+    var directionsDisplay = new google.maps.DirectionsRenderer();
+    directionsDisplay.setMap(map);
+
+    var directionsService = new google.maps.DirectionsService();
+
+    var request = {
+      origin: start,
+      destination: end,
+      travelMode: travelMode
+    };
+
+    return $.Deferred(function(promise) {
+
+      drectionsService.route(request, function(result, status) {
+
+        if(status === google.maps.GeocoderStatus.OK)
+        {
+          promise.resolve(result);
+        }
+        else
+        {
+          promise.reject(new Error(status));
+        }
+
+      });
+
+    }).promise();
+
   }
 
   function handleSearchSubmit(event) {
@@ -64,7 +92,12 @@
         getNearbyProntoStation(endLoc.lat(), endLoc.lng())
 
       )
-      .done(displayStations);
+      .then(function(startStations, endStations) {
+
+        return getMatchingProntoRoutes(startStations, endStations)
+
+      })
+      .done(displayRoutes);
 
   }
 
@@ -90,30 +123,24 @@
 
   }
 
-  function displayStations(startStations, endStations) {
+  function displayRoutes(data) {
 
-    $.when(
+    console.log(data);
 
-      getMatchingProntoRoutes(startStations, endStations)
-
-    ).done(function(data) {
-
-      $.each(data, function (i, entry) {
-        $('#results').dataTable().fnAddData(
-          [
-            entry.starting_station,
-            entry.end_station,
-            '<a href="' + entry.route_link + '" target="_blank">View route &raquo;</a>',
-            entry.distance,
-            entry.time,
-            entry.elevation_gain,
-            entry.elevation_descent,
-            entry.scenery,
-            entry.difficulty
-          ]
-        );
-      });
-
+    $.each(data, function (i, entry) {
+      $('#results').dataTable().fnAddData(
+        [
+          entry.starting_station,
+          entry.end_station,
+          '<a href="' + entry.route_link + '" target="_blank">View route &raquo;</a>',
+          entry.distance,
+          entry.time,
+          entry.elevation_gain,
+          entry.elevation_descent,
+          entry.scenery,
+          entry.difficulty
+        ]
+      );
     });
 
   }
