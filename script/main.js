@@ -118,7 +118,7 @@
 
   }
 
-  $(document).ready(function() {
+  $(function() {
 
     // Intialize our map
     var center = new google.maps.LatLng(47.645292, -122.301120);
