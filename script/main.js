@@ -1,7 +1,9 @@
 (function() {
 
-  var map;
   var socrataAppToken = 'MmFqykL8mygeptjRHvgrmqcHL';
+
+  var map;
+  var stations = [];
 
   function geocode(address) {
     return $.Deferred(function(dfrd) {
@@ -76,6 +78,16 @@
 
   }
 
+  function clearStationCache() {
+    stations = [];
+  }
+
+  function cacheStations(newStations) {
+    $.each(newStations[0], function(station) {
+      stations[station.number] = station;
+    });
+  }
+
   function initMap(start, end) {
 
       // Add markers for start and end
@@ -94,10 +106,18 @@
       )
       .then(function(startStations, endStations) {
 
+        clearStationCache();
+        cacheStations(startStations);
+        cacheStations(endStations);
+
         return getMatchingProntoRoutes(startStations, endStations)
 
       })
-      .done(displayRoutes);
+      .then(function(routes) {
+
+        displayRoutes(routes);
+
+      });
 
   }
 
@@ -123,11 +143,9 @@
 
   }
 
-  function displayRoutes(data) {
+  function displayRoutes(routes) {
 
-    console.log(data);
-
-    $.each(data, function (i, entry) {
+    $.each(routes, function (i, entry) {
       $('#results').dataTable().fnAddData(
         [
           entry.starting_station,
