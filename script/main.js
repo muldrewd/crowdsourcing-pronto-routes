@@ -1,4 +1,4 @@
-var geocode = function(address) {
+function geocode(address) {
   return $.Deferred(function(dfrd) {
     console.log(address);
     (new google.maps.Geocoder()).geocode({'address': address}, function(results, status) {
@@ -9,7 +9,25 @@ var geocode = function(address) {
       }
     });
   }).promise();
-};
+}
+
+function getNearbyProntoStation(lat, lon) {
+  return $.getJSON(
+    'https://communities.socrata.com/resource/rsib-fvg5.json?'
+    + '&$where=within_circle(location_1, ' + lat + ', ' + lon + ', 1000)'
+    + '&$$app_token=MmFqykL8mygeptjRHvgrmqcHL');
+}
+
+function addMarker(map, location) {
+  var marker = new google.maps.Marker({
+    map: map,
+    position: location,
+    icon: {
+      path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+      scale: 4
+    }
+  });
+}
 
 $(document).ready(function () {
   // Intialize our map
@@ -28,31 +46,32 @@ $(document).ready(function () {
     event.preventDefault();
 
     // Geocode our addresses
-    $.when(geocode($("#startaddress").val()),
-    geocode($("#endaddress").val()))
+    $.when(
+
+      geocode($("#startaddress").val()),
+      geocode($("#endaddress").val())
+
+    )
     .done(function(start_geocode, end_geocode) {
+
       // Add markers for start and end
-      var start_marker = new google.maps.Marker({
-        map: map,
-        position: start_geocode.geometry.location,
-        icon: {
-          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-          scale: 4
-        }
-      });
-      var end_marker = new google.maps.Marker({
-        map: map,
-        position: end_geocode.geometry.location,
-        icon: {
-          path: google.maps.SymbolPath.CIRCLE,
-          scale: 4
-        }
-      });
+      var startLoc = start_geocode.geometry.location;
+      var endLoc = end_geocode.geometry.location;
+
+      addMarker(map, startLoc);
+      addMarker(map, endLoc);
 
       // Get our start and end locations
-      $.when($.getJSON('https://communities.socrata.com/resource/rsib-fvg5.json?' + '&$where=within_circle(location_1, ' + start_geocode.geometry.location.lat() + ', ' + start_geocode.geometry.location.lng() + ', 1000)' + '&$$app_token=MmFqykL8mygeptjRHvgrmqcHL'),
-      $.getJSON('https://communities.socrata.com/resource/rsib-fvg5.json?' + '&$where=within_circle(location_1, ' + end_geocode.geometry.location.lat() + ', ' + end_geocode.geometry.location.lng() + ', 1000)' + '&$$app_token=MmFqykL8mygeptjRHvgrmqcHL'))
+      $.when(
+
+        getNearbyProntoStation(startLoc.lat(), startLoc.lng()),
+        getNearbyProntoStation(endLoc.lat(), endLoc.lng())
+
+      )
       .done(function(start_stations, end_stations) {
+
+        console.log(start_stations[0][0]);
+
         // Query our routes dataset to get matching routes
         var start_station_matches = [];
         $.each(start_stations[0], function(i, st) {
