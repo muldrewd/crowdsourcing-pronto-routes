@@ -78,6 +78,14 @@
 
   }
 
+  function handleMapDisplayBtnClick(event) {
+
+    event.preventDefault();
+
+    console.log('Pressed button');
+
+  }
+
   function clearStationCache() {
     stations = [];
   }
@@ -151,6 +159,7 @@
           entry.starting_station,
           entry.end_station,
           '<a href="' + entry.route_link + '" target="_blank">View route &raquo;</a>',
+          '<button class="map-display-btn">Display Route</button>',
           entry.distance,
           entry.time,
           entry.elevation_gain,
@@ -180,6 +189,8 @@
     $('#results').dataTable();
 
     $("#search").submit(handleSearchSubmit);
+
+    $('#results').on('click', '.map-display-btn', handleMapDisplayBtnClick);
 
   });
 
