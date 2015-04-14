@@ -82,7 +82,13 @@
 
     event.preventDefault();
 
-    console.log('Pressed button');
+    var $row = $(this).closest('tr');
+    var $cols = $row.children('td');
+
+    var startStation = $cols.eq('0').text();
+    var endStation = $cols.eq('1').text();
+
+    console.log(stations[startStation]);
 
   }
 
@@ -91,7 +97,7 @@
   }
 
   function cacheStations(newStations) {
-    $.each(newStations[0], function(station) {
+    $.each(newStations[0], function(i, station) {
       stations[station.number] = station;
     });
   }
