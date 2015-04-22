@@ -5,6 +5,9 @@
   var map;
   var stations = [];
 
+  var startLocation;
+  var endLocation;
+
   function geocode(address) {
     return $.Deferred(function(dfrd) {
       (new google.maps.Geocoder()).geocode({'address': address}, function(results, status) {
@@ -46,11 +49,12 @@
 
     return $.Deferred(function(promise) {
 
-      drectionsService.route(request, function(result, status) {
+      directionsService.route(request, function(result, status) {
 
         if(status === google.maps.GeocoderStatus.OK)
         {
-          promise.resolve(result);
+          directionsDisplay.setDirections(result);
+          promise.resolve();
         }
         else
         {
@@ -85,10 +89,30 @@
     var $row = $(this).closest('tr');
     var $cols = $row.children('td');
 
-    var startStation = $cols.eq('0').text();
-    var endStation = $cols.eq('1').text();
+    var startStationNumber = $cols.eq('0').text();
+    var endStationNumber = $cols.eq('1').text();
 
-    console.log(stations[startStation]);
+    var startStation = stations[startStationNumber];
+    var endStation = stations[endStationNumber];
+
+    var startStationPoint = new google.maps.LatLng(
+      startStation.location_1.latitude,
+      startStation.location_1.longitude);
+
+    $.when(
+
+      // Directions: Walk From Start Location to Start Station
+      getDirections(startLocation, startStationPoint,
+          google.maps.TravelMode.WALKING)
+
+      // Directions: Bike From Start Station to End Station
+      // ...
+
+      // Directions: Walk From End Station to End Location
+      // ...
+
+    )
+    .done(displayDirections);
 
   }
 
@@ -105,17 +129,17 @@
   function initMap(start, end) {
 
       // Add markers for start and end
-      var startLoc = start.geometry.location;
-      var endLoc = end.geometry.location;
+      startLocation = start.geometry.location;
+      endLocation = end.geometry.location;
 
-      addMarker(startLoc);
-      addMarker(endLoc);
+      addMarker(startLocation);
+      addMarker(endLocation);
 
       // Get our start and end locations
       $.when(
 
-        getNearbyProntoStation(startLoc.lat(), startLoc.lng()),
-        getNearbyProntoStation(endLoc.lat(), endLoc.lng())
+        getNearbyProntoStation(startLocation.lat(), startLocation.lng()),
+        getNearbyProntoStation(endLocation.lat(), endLocation.lng())
 
       )
       .then(function(startStations, endStations) {
@@ -175,6 +199,10 @@
         ]
       );
     });
+
+  }
+
+  function displayDirections() {
 
   }
 
