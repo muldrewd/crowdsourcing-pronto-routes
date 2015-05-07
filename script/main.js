@@ -99,20 +99,32 @@
       startStation.location_1.latitude,
       startStation.location_1.longitude);
 
+    var endStationPoint = new google.maps.LatLng(
+      endStation.location_1.latitude,
+      endStation.location_1.longitude);
+
     $.when(
 
       // Directions: Walk From Start Location to Start Station
       getDirections(startLocation, startStationPoint,
-          google.maps.TravelMode.WALKING)
+          google.maps.TravelMode.WALKING),
 
       // Directions: Bike From Start Station to End Station
-      // ...
+      getDirections(startStationPoint, endStationPoint,
+          google.maps.TravelMode.BICYCLING),
 
       // Directions: Walk From End Station to End Location
-      // ...
+      getDirections(endStationPoint, endLocation,
+          google.maps.TravelMode.WALKING)
 
     )
-    .done(displayDirections);
+    .done(function(startWalkingDirs, bikingDirs, endWalkingDirs) {
+
+      displayDirections(startWalkingDirs);
+      displayDirections(bikingDirs);
+      displayDirections(endWalkingDirs);
+
+    });
 
   }
 
@@ -214,7 +226,7 @@
     var mapOptions = {
       zoom: 12,
       center: center,
-      draggable: false
+      draggable: true
     }
 
     map = new google.maps.Map(document.getElementById("map"), mapOptions);
